@@ -2,6 +2,8 @@
 #include <iostream>
 #include <iostream>
 
+#include <time.h>
+
 
 using namespace std;
 
@@ -15,7 +17,7 @@ const long long LINF = 1e18;
 const int N = 26;
 int D = 365;
 vector<int> c (N);
-vector<vector<int>> s(D);
+vector<vector<int>> s (D);
 
 
 //Greedy solution
@@ -60,16 +62,18 @@ long long evaluate(vector<int> ans, int k)
 	int len = ans.size();
 	
 	long long score = 0;
+	
 	for( int d = 0; d < len; d++)
 	{
 		last[ans[d] - 1] = d + 1;
-		score = 1e6 + s[d][ans[d] - 1];
+		score += s[d][ans[d] - 1];
+		
 		for( int i = 0; i < N; i++)
 		{
 			score -= (c[i] * (d + 1 - last[i]));
 		}
 	}
-
+	
 	for( int d = len; d < len + k && d < D; d++)
 	{
 		for( int i = 0; i < N; i++)
@@ -81,10 +85,9 @@ long long evaluate(vector<int> ans, int k)
 	return score;
 }
 
-vector<int> better_greedy()
-{
+vector<int> better_greedy() {
 	vector<int> ans;
-	int k = 5;
+	int k = 4;
 	
 	for( int i = 0; i < D; i++)
 	{
@@ -107,6 +110,60 @@ vector<int> better_greedy()
 	
 	return ans;	
 }
+
+// Up-hill, change one element for a different one at random or perform a swap, and keep it if improves the solution
+
+void up_hill(vector<int> &ans)
+{
+	srand(time(NULL));
+	
+	double TL = 1.8;
+	time_t start = time(0);
+	
+	long long s = evaluate(ans, 0);
+	
+	while(difftime( time(0), start) < TL)
+	{
+		if(rand() % 2)
+		{
+			int d = (D + (rand() % D)) % D;
+			int q = ((N + (rand() % N)) % N) + 1;
+			
+			int old = ans[d];
+			
+			ans[d] = q;
+			
+			long long ns = evaluate(ans, 0);
+			
+			if(ns < s)
+			{
+				ans[d] = old;
+			} else {
+				s = ns;
+			}
+			
+		} else {
+			int d1 = (D + (rand() % D)) % D;
+			int d2 = d1 + ((16 + (rand() % 16)) % 16);
+			d2 = (d2 < D - 1) ? d2 : D - 1;
+			
+			int aux = ans[d1];
+			ans[d1] = ans[d2];
+			ans[d2] = aux;
+			
+			long long ns = evaluate(ans, 0);
+			
+			if(ns < s)
+			{
+				ans[d2] = ans[d1];
+				ans[d1] = aux;
+			} else {
+				s = ns;
+			}
+		}
+	}
+}
+	
 
 
 //Genetic algorithm starts here -------------------------------------------------------
@@ -284,6 +341,7 @@ int main() {
 	}
 	
 	vector<int> sol = better_greedy();
+	up_hill(sol);
 	for(auto& e : sol) { cout << e << endl; }
 
     return 0;
