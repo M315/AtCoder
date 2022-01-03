@@ -20,7 +20,7 @@ impl DisjointSets {
     /// Finds the set's representative. Do path compression along the way to make
     /// future queries faster.
     pub fn find(&mut self, u: usize) -> usize {
-        let pu = self.parent[u];
+        let pu : usize = self.parent[u];
         if pu != u {
             self.parent[u] = self.find(pu);
         }
@@ -30,7 +30,7 @@ impl DisjointSets {
     /// Merges the sets containing u and v into a single set containing their
     /// union. Returns true if u and v were previously in different sets.
     pub fn merge(&mut self, u: usize, v: usize) -> bool {
-        let (pu, pv) = (self.find(u), self.find(v));
+        let (pu, pv) : (usize, usize) = (self.find(u), self.find(v));
         self.parent[pu] = pv;
         pu != pv
     }
@@ -46,7 +46,7 @@ fn main()
 
     let mut d : Vec<usize> = vec![0; n];
 
-    let mut ds = DisjointSets::new(n);
+    let mut ds : DisjointSets = DisjointSets::new(n);
     
     for _ in 0..m
     {
